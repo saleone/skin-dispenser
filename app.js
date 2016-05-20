@@ -11,28 +11,28 @@ var accountNames = configs["accountNames"];
 var clients 	= [];
 var managers 	= [];
 var communities = [];
-for (i = 0; i < accountLoginInfos.length; i++) {
-	clients[i] 	= new SteamUser();
-	managers[i] = new TradeOfferManager({
-		"steam": clients[i],
+
+var accountTradeHandler = function(username, password, sharedSecret) {
+	var client 	= new SteamUser();
+	var manager = new TradeOfferManager({
+		"steam": client,
 		"domain": "somedomain.com",
 		"language": "en"
 	});
+	var community = new SteamCommunity();
 
-	var pollDataFile = "polldata" + i + ".json"
+	var pollDataFile = "polldata_" + username + ".json";
 	if (fs.existsSync(pollDataFile)) {
-		managers[i].pollData = JSON.parse(fs.readFileSync(pollDataFile));
+		manager.pollData = JSON.parse(fs.readFileSync(pollDataFile));
 	}
 
-	communities[i] = new SteamCommunity();
-
-	clients[i].logOn({
-		"accountName": accountLoginInfos[i][0],
-		"password": accountLoginInfos[i][1],
-		"twoFactorCode": SteamTotp.getAuthCode(accountLoginInfos[i][2])
+	client.logOn({
+		"accountName": username,
+		"password": password,
+		"twoFactorCode": SteamTotp.getAuthCode(sharedSecret)
 	});
 
-	clients[i].on("loggedOn", function() {
+	client.on("loggedOn", function() {
 		console.log("[NOTE] User " + (accountNames[this.steamID] || this.steamID)
 			+ " successfully logged into Steam.");
 	});
@@ -44,50 +44,58 @@ for (i = 0; i < accountLoginInfos.length; i++) {
 				process.exit(1);
 				return;
 			}
-
-			console.log("Got API key: " + manager.apiKey);
 		});
 
 		community.setCookies(cookies);
-		community.startConfirmationChecker(50000, "identitySecret" + i);
+		community.startConfirmationChecker(50000, "identitySecret" + username);
 	});
 
-	managers[i].on("newOffer", function(offer) {
-		console.log("[" + offer.manager.steamID + "] Received offer with ID:" + offer.id + "." );
+	manager.on("newOffer", function(offer) {
+		account = accountNames[offer.manager.steamID] || offer.manager
+		console.log("\n[OFFER] " + account + " received an offer with ID: " + offer.id + "." );
 		if (offer.itemsToGive.length == 0) {
 			offer.accept(function(err) {
 				if (err) {
-					console.log(">> [ERROR] Unable to accept offer: " + err.message);
+					console.log("  >> [ERROR] Unable to accept offer: " + err.message);
 				} else {
-					communities[i].checkConfirmations();
-					console.log(">> [NOTE] Offer accepted.")
+					community.checkConfirmations();
+					console.log("  >> [DONE] Offer accepted.")
 				}
 			});
 		} else {
-			console.log(">> [NOTE] Unable to accept offer:" + "Trade requests items.");
+			console.log("  >> [NOTE] Unable to accept offer:" + " Trade sender requests items.");
 		}
 	});
 
-	managers[i].on("receivedOfferChanged", function(offer, oldState) {
-		console.log("[" + offer.manager.steamID + "] Offer state change (" + offer.id + "): "
+	manager.on("receivedOfferChanged", function(offer, oldState) {
+		account = accountNames[offer.manager.steamID] || offer.manager
+		console.log("\n[OFFER] " + account + "'s trade offer state changed (" + offer.id + "): "
 			+ TradeOfferManager.getStateName(oldState) + " -> "
 			+ TradeOfferManager.getStateName(offer.state));
 
 		if (offer.state == TradeOfferManager.ETradeOfferState.Accepted) {
 			offer.getReceivedItems(function(err, items) {
 				if (err) {
-					console.log(">> [ERROR] Could not get received items: " + err);
+					console.log("  >> [ERROR] Could not get received items: " + err);
 				} else {
 					var names = items.map(function(item) {
 						return item.name;
 					});
-					console.log(">> Received: " + names.join(", "));
+					console.log("  >> [DONE] Received: " + names.join(", "));
 				}
 			});
 		}
 	});
 
-	managers[i].on("pollData", function(pollData) {
-		fs.writeFile("polldata.json", JSON.stringify(pollData));
+	manager.on("pollData", function(pollData) {
+		fs.writeFile(pollDataFile, JSON.stringify(pollData));
 	})
+
+	clients.push(client);
+	managers.push(manager);
+	communities.push(community);
+}
+
+for (i = 0; i < accountLoginInfos.length; i++) {
+	accountTradeHandler(accountLoginInfos[i][0], accountLoginInfos[i][1], accountLoginInfos[i][2]);
 }
