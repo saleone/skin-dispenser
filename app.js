@@ -7,15 +7,10 @@ var SteamTotp = require('steam-totp')
 var shell = require("shelljs")
 
 
-
 var configs = JSON.parse(fs.readFileSync('config.json'))
 var accountLoginInfos = configs["accounts"];
 var accountNames = configs["accountNames"];
 var sounds = configs["sounds"];
-
-var clients 	= [];
-var managers 	= [];
-var communities = [];
 
 var accountTradeHandler = function(username, password, sharedSecret) {
 	var client 	= new SteamUser();
@@ -104,10 +99,6 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 	manager.on("pollData", function(pollData) {
 		fs.writeFile(pollDataFile, JSON.stringify(pollData));
 	})
-
-	clients.push(client);
-	managers.push(manager);
-	communities.push(community);
 }
 
 for (i = 0; i < accountLoginInfos.length; i++) {
