@@ -4,14 +4,15 @@
             ["username1", "password1", "sharedSecret1"],
             ["username2", "password2", "sharedSecret2"]
         ],
+
     "accountNames": {
-        "steam64ID1": "NameToDiplayForId1",
+        "steam64ID1": "NameToDisplayForId1",
         "steam64Id2": "NameToDisplayForId2"
     },
 
     "sounds": {
         "regularOffer": "path/to/regular_offer.mp3",
-        "dispensed": "path/to/dispensed.wav",
+        "dispensed": "path/to/dispensed.mp3",
         "errorOnDispense": "path/to/error.mp3"
     }
 }
