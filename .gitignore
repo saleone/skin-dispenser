@@ -1,2 +1,4 @@
 node_modules/
 polldata*.json
+node_modules.zip
+config.json
