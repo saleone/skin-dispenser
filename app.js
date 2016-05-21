@@ -1,12 +1,17 @@
+var fs = require('fs')
+
 var TradeOfferManager = require('steam-tradeoffer-manager');
 var SteamUser = require('steam-user');
 var SteamCommunity = require('steamcommunity');
 var SteamTotp = require('steam-totp')
-var fs = require('fs')
+var shell = require("shelljs")
+
+
 
 var configs = JSON.parse(fs.readFileSync('config.json'))
 var accountLoginInfos = configs["accounts"];
 var accountNames = configs["accountNames"];
+var sounds = configs["sounds"];
 
 var clients 	= [];
 var managers 	= [];
@@ -57,13 +62,22 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 			offer.accept(function(err) {
 				if (err) {
 					console.log("  >> [ERROR] Unable to accept offer: " + err.message);
+					if (fs.existsSync(sounds["errorOnDispense"])) {
+						shell.exec("mplayer.exe " + sounds["errorOnDispense"], {"silent": true});
+					}
 				} else {
 					community.checkConfirmations();
 					console.log("  >> [DONE] Offer accepted.")
+					if (fs.existsSync(sounds["dispensed"])) {
+						shell.exec("mplayer.exe " + sounds["dispensed"], {"silent": true});
+					}
 				}
 			});
 		} else {
 			console.log("  >> [NOTE] Unable to accept offer:" + " Trade sender requests items.");
+			if (fs.existsSync(sounds["regularOffer"])) {
+				shell.exec("mplayer.exe " + sounds["regularOffer"], {"silent": true} );
+			}
 		}
 	});
 
