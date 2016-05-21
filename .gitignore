@@ -4,3 +4,4 @@ node_modules.zip
 config.json
 *.mp3
 *.wav
+mplayer/
