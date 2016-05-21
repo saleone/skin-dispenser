@@ -1,0 +1,27 @@
+{
+  "name": "skin-dispenser-browserless",
+  "version": "0.1.0",
+  "description": "Collect empty offers on steam trades.",
+  "main": "app.js",
+  "dependencies": {
+    "shelljs": "^0.7.0",
+    "steam-tradeoffer-manager": "^1.22.3",
+    "steam-totp": "^1.3.0",
+    "steam-user": "^3.5.1",
+    "steamcommunity": "^3.19.8"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/saleone/skin-dispenser-browserless.git"
+  },
+  "keywords": [],
+  "author": "Sasa Savic <sasa.savic@protonmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/saleone/skin-dispenser-browserless/issues"
+  },
+  "homepage": "https://gitlab.com/saleone/skin-dispenser-browserless#README"
+}
