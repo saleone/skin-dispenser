@@ -5,3 +5,4 @@ config.1.json
 *.mp3
 *.wav
 mplayer/
+npm-debug.log
