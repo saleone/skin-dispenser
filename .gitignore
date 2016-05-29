@@ -6,3 +6,4 @@ config.1.json
 *.wav
 mplayer/
 npm-debug.log
+trade_logs/
