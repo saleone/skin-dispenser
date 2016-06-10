@@ -28,12 +28,12 @@ var getOfferItems = function(offer) {
 	var items = {"receiving": [], "giving": []};
 	for (i = 0; i < offer.itemsToReceive.length; i++) {
 		var itemPair = [offer.itemsToReceive[i].id, offer.itemsToReceive[i].market_name];
-		items["receiving"].push(itemPair);	
+		items["receiving"].push(itemPair);
 	}
 	for (i = 0; i < offer.itemsToGive.length; i++) {
-		var itemPair = [offer.itemsToGive[i].id, offer.itemsToGive[i].market_name];	
+		var itemPair = [offer.itemsToGive[i].id, offer.itemsToGive[i].market_name];
 		items["giving"].push(itemPair);
-	}	
+	}
 	return items;
 }
 
@@ -50,6 +50,12 @@ var createLogPath = function(level, username) {
 	return logPath;
 }
 
+var playSound = function(soundType) {
+    if (fs.existsSync(sounds[soundType])) {
+        shell.exec("mplayer.exe " + sounds[soundType], {"silent": true});
+    }
+}
+
 var accountTradeHandler = function(username, password, sharedSecret) {
 	var client 	= new SteamUser();
 	var manager = new TradeOfferManager({
@@ -58,7 +64,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 		"language": "en"
 	});
 	var community = new SteamCommunity();
-	
+
 	var logger = new winston.Logger({
 		levels: {
 			"error": 0,
@@ -109,7 +115,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 			})
 		]
 	});
-	loggers[username] = logger; 
+	loggers[username] = logger;
 
 	var pollDataFile = "polldata_" + username + ".json";
 	if (fs.existsSync(pollDataFile)) {
@@ -149,22 +155,16 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 			offer.accept(function(err) {
 				if (err) {
 					logger.error(message + "Unable to accept offer: " + err.message, offerItems);
-					if (fs.existsSync(sounds["errorOnDispense"])) {
-						shell.exec("mplayer.exe " + sounds["errorOnDispense"], {"silent": true});
-					}
+                    playSound("errorOnDispense");
 				} else {
 					community.checkConfirmations();
 					logger.success(message + "Offer accepted.", offerItems);
-					if (fs.existsSync(sounds["dispensed"])) {
-						shell.exec("mplayer.exe " + sounds["dispensed"], {"silent": true});
-					}
+                    playSound("dispensed");
 				}
 			});
 		} else {
 			logger.regular(message + "Skiping offer:" + " Trade sender requests items.", offerItems);
-			if (fs.existsSync(sounds["regularOffer"])) {
-				shell.exec("mplayer.exe " + sounds["regularOffer"], {"silent": true} );
-			}
+            playSound("regularOffer");
 		}
 	});
 
