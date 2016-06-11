@@ -7,7 +7,7 @@ To run the script you will need to:
 * Install [node.js](https://nodejs.org) for your platform.
 * Update Node Package Manager with ```npm install npm -g```.
 * Install ```steam-tradeoffer-manager```, ```steam-user```, ```date-util```, ```winston``` and ```shelljs``` packages with ```npm```.
-* Configure your ```config.json``` (example in [config.json](./config.json)).
+* Configure your ```config.json``` (example in [config.json](./src/config.json)).
 * Run ```app.js``` with ```node```.
 
 ## License
