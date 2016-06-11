@@ -10,7 +10,8 @@
     "steam-user": "^3.5.1",
     "steamcommunity": "^3.19.8",
     "winston": "^2.2.0",
-    "date-utils": "^1.2.1"
+    "date-utils": "^1.2.1",
+    "fifo": "^2.3.0"
   },
   "author": {
       "name": "Sasa Savic",
