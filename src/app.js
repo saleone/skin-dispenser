@@ -6,10 +6,11 @@ const TradeOfferManager = require('steam-tradeoffer-manager');
 const SteamUser = require('steam-user');
 const SteamCommunity = require('steamcommunity');
 const SteamTotp = require('steam-totp');
-const shell = require("shelljs");
+const shell = require('shelljs');
 
-const cfg = require("./config_parser");
-const log = require("./logging");
+const cfg = require('./config_parser');
+const log = require('./logging');
+const storage = require('./offer_storage');
 
 var getOfferItems = function(offer) {
 	var items = {
@@ -86,6 +87,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 		if (offer.itemsToGive.length == 0) {
 			offer.accept(function(err) {
 				if (err) {
+					storage.push(offer);
 					logger.error(message + "Unable to accept offer: " + err.message, offerItems);
 					playSound("errorOnDispense");
 				} else {
