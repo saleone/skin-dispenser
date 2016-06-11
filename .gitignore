@@ -1,9 +1,11 @@
 node_modules/
+mplayer/
+trade_logs/
 polldata*.json
-node_modules.zip
-config.1.json
 *.mp3
 *.wav
-mplayer/
+node_modules.zip
+config.1.json
+default.json
+test.json
 npm-debug.log
-trade_logs/
