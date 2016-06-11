@@ -1,7 +1,7 @@
 node_modules/
 mplayer/
 trade_logs/
-polldata*.json
+polldata/
 *.mp3
 *.wav
 node_modules.zip
