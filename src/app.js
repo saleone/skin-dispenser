@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require("path");
 
 require('date-util');
 const TradeOfferManager = require('steam-tradeoffer-manager');
@@ -7,22 +6,9 @@ const SteamUser = require('steam-user');
 const SteamCommunity = require('steamcommunity');
 const SteamTotp = require('steam-totp');
 const shell = require("shelljs");
-const winston = require("winston");
 
-const configs = JSON.parse(fs.readFileSync('config.json'));
-const accountLoginInfos = configs["accounts"];
-const accountNames = configs["accountNames"];
-const sounds = configs["sounds"];
-const logging = configs["logging"];
-const dateFormats = configs["dateFormats"];
-
-winston.addColors({
-	"error": "red",
-	"success": "green",
-	"regular": "blue",
-	"info": "yellow"
-});
-var loggers = {};
+const cfg = require("./config_parser");
+const log = require("./logging");
 
 var getOfferItems = function(offer) {
 	var items = {"receiving": [], "giving": []};
@@ -37,22 +23,9 @@ var getOfferItems = function(offer) {
 	return items;
 }
 
-var createLogPath = function(level, username) {
-	var logPath = path.join(shell.pwd().toString(), logging["logFilesRoot"]);
- 	shell.mkdir("-p", logPath);
-	if (logging["separateAccountFolders"]) {
-		logPath = path.join(logPath, username)
-		shell.mkdir("-p", logPath);
-		logPath = path.join(logPath, level + "_log.txt");
-	} else {
-		logPath  = path.join(logPath, username + "_" + level + "_log.txt");
-	}
-	return logPath;
-}
-
 var playSound = function(soundType) {
-    if (fs.existsSync(sounds[soundType])) {
-        shell.exec("mplayer.exe " + sounds[soundType], {"silent": true});
+    if (fs.existsSync(cfg.sounds[soundType])) {
+        shell.exec("mplayer.exe " + cfg.sounds[soundType], {"silent": true});
     }
 }
 
@@ -65,57 +38,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 	});
 	var community = new SteamCommunity();
 
-	var logger = new winston.Logger({
-		levels: {
-			"error": 0,
-			"success": 1,
-			"regular": 2,
-			"info": 3
-		},
-		transports: [
-			new winston.transports.Console({
-				colorize: true,
-				timestamp: function() {
-					return new Date().format(dateFormats["console"])
-				},
-				formatter: function(opts) {
-					return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
-						(undefined !== opts.message ? opts.message : '')
-				}
-			}),
-			new winston.transports.File({
-				name: "datamine",
-				filename: createLogPath("datamine", username),
-				timestamp: function() {
-					return Date.now().toString() + "|" + new Date().format(dateFormats["logFile"]);
-				},
-				json: false,
-				formatter: function(opts) {
-					var timeSplit = opts.timestamp().split("|");
-					return JSON.stringify({
-						"time" : timeSplit[0],
-						"date": timeSplit[1],
-						"severity": opts.level,
-						"message": (opts.message !== undefined ? opts.message : ''),
-						"items": opts.meta
-					});
-				}
-			}),
-			new winston.transports.File({
-				name: "all",
-				filename: createLogPath("all", username),
-				timestamp: function() {
-					return new Date().format(dateFormats["logFile"]);
-				},
-				json: false,
-				formatter: function(opts) {
-					return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
-						(undefined !== opts.message ? opts.message : '')
-				}
-			})
-		]
-	});
-	loggers[username] = logger;
+	var logger = log.createLogger("all", username);
 
 	var pollDataFile = "polldata_" + username + ".json";
 	if (fs.existsSync(pollDataFile)) {
@@ -129,7 +52,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 	});
 
 	client.on("loggedOn", function() {
-		winston.info("User " + (accountNames[this.steamID] || this.steamID)
+		log.winston.info("User " + (cfg.accountNames[this.steamID] || this.steamID)
 			+ " successfully logged into Steam.");
 	});
 
@@ -147,9 +70,8 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 	});
 
 	manager.on("newOffer", function(offer) {
-		account = accountNames[offer.manager.steamID] || offer.manager
+		account = cfg.accountNames[offer.manager.steamID] || offer.manager
 		var offerItems = getOfferItems(offer);
-		var logger = loggers[account];
 		var message = account + " received an offer with ID: " + offer.id + ". ";
 		if (offer.itemsToGive.length == 0) {
 			offer.accept(function(err) {
@@ -169,8 +91,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 	});
 
 	manager.on("receivedOfferChanged", function(offer, oldState) {
-		account = accountNames[offer.manager.steamID] || offer.manager
-		var logger = loggers[account];
+		account = cfg.accountNames[offer.manager.steamID] || offer.manager
 		var offerItems = getOfferItems(offer);
 		var message = account + "'s trade offer state changed (" + offer.id + "): "
 			+ TradeOfferManager.getStateName(oldState) + " -> "
@@ -196,6 +117,6 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 	})
 }
 
-for (i = 0; i < accountLoginInfos.length; i++) {
-	accountTradeHandler(accountLoginInfos[i][0], accountLoginInfos[i][1], accountLoginInfos[i][2]);
+for (i = 0; i < cfg.accountLoginInfos.length; i++) {
+	accountTradeHandler(cfg.accountLoginInfos[i][0], cfg.accountLoginInfos[i][1], cfg.accountLoginInfos[i][2]);
 }
