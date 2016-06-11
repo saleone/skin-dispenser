@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 require('date-util');
 const TradeOfferManager = require('steam-tradeoffer-manager');
@@ -40,7 +41,11 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 
 	var logger = log.createLogger("all", username);
 
-	var pollDataFile = "polldata_" + username + ".json";
+    polldataDir = "polldata/";
+    if (!fs.exists(polldataDir)) {
+        shell.mkdir("-p", polldataDir);
+    }
+	var pollDataFile = path.join(polldataDir ,username + "_polldata.json");
 	if (fs.existsSync(pollDataFile)) {
 		manager.pollData = JSON.parse(fs.readFileSync(pollDataFile));
 	}
