@@ -23,7 +23,7 @@
       shell.mkdir("-p", logPath);
       logPath = path.join(logPath, level + "_log.txt");
     } else {
-      logPath  = path.join(logPath, username + "_" + level + "_log.txt");
+      logPath = path.join(logPath, username + "_" + level + "_log.txt");
     }
     return logPath;
   }
@@ -57,7 +57,7 @@
           formatter: function(opts) {
             var timeSplit = opts.timestamp().split("|");
             return JSON.stringify({
-              "time" : timeSplit[0],
+              "time": timeSplit[0],
               "date": timeSplit[1],
               "severity": opts.level,
               "message": (opts.message !== undefined ? opts.message : ''),
