@@ -121,7 +121,9 @@ var accountTradeHandler = function(username, password, sharedSecret) {
 					logger.success(message + " Received: " + names.join(", "), offerItems);
 				}
 			});
-		}
+		} else {
+            logger.regular(message);
+        }
 	});
 
 	manager.on("pollData", function(pollData) {
