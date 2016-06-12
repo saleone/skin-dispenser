@@ -51,7 +51,7 @@
           name: "datamine",
           filename: createLogPath("datamine", username),
           timestamp: function() {
-            return Date.now().toString() + "|" + new Date().format(cfg.dateFormats["logFile"]);
+            return Date.now().toString() + "|" + new Date().format("HH:MM:ss dd.mm.yyyy");
           },
           json: false,
           formatter: function(opts) {
