@@ -12,4 +12,4 @@ To run the script you will need to:
 * Run ```app.js``` with ```node```.
 
 ## License
-Skin Dispenser Browserless is released under the terms of [MIT license](./LICENSE.md).
+All versions of Skin Dispenser Browserless are released under the terms of [GNU GPLv3](./LICENSE).
