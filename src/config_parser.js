@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const fs = require("fs")
 
   if (!fs.existsSync("config.json")) {

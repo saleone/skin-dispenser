@@ -12,7 +12,7 @@ const cfg = require('./config_parser');
 const log = require('./logging');
 const storage = require('./offer_storage');
 
-var getOfferItems = function(offer) {
+var getOfferItems = function (offer) {
   var items = {
     "receiving": [],
     "giving": []
@@ -28,7 +28,7 @@ var getOfferItems = function(offer) {
   return items;
 }
 
-var playSound = function(soundType) {
+var playSound = function (soundType) {
   if (fs.existsSync(cfg.sounds[soundType])) {
     shell.exec("mplayer.exe " + cfg.sounds[soundType], {
       "silent": true
@@ -36,7 +36,7 @@ var playSound = function(soundType) {
   }
 }
 
-var accountTradeHandler = function(username, password, sharedSecret) {
+var accountTradeHandler = function (username, password, sharedSecret) {
   var client = new SteamUser();
   var manager = new TradeOfferManager({
     "steam": client,
@@ -62,13 +62,13 @@ var accountTradeHandler = function(username, password, sharedSecret) {
     "twoFactorCode": SteamTotp.getAuthCode(sharedSecret)
   });
 
-  client.on("loggedOn", function() {
+  client.on("loggedOn", function () {
     log.winston.info("User " + (cfg.accountNames[this.steamID] || this.steamID) +
       " successfully logged into Steam.");
   });
 
-  client.on('webSession', function(sessionID, cookies) {
-    manager.setCookies(cookies, function(err) {
+  client.on('webSession', function (sessionID, cookies) {
+    manager.setCookies(cookies, function (err) {
       if (err) {
         console.log(err);
         process.exit(1);
@@ -80,12 +80,12 @@ var accountTradeHandler = function(username, password, sharedSecret) {
     community.startConfirmationChecker(50000, "identitySecret" + username);
   });
 
-  manager.on("newOffer", function(offer) {
+  manager.on("newOffer", function (offer) {
     account = cfg.accountNames[offer.manager.steamID] || offer.manager
     var offerItems = getOfferItems(offer);
     var message = account + " received an offer with ID: " + offer.id + ". ";
     if (offer.itemsToGive.length == 0) {
-      offer.accept(function(err) {
+      offer.accept(function (err) {
         if (err) {
           storage.push(offer);
           logger.error(message + "Unable to accept offer: " + err.message, offerItems);
@@ -102,7 +102,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
     }
   });
 
-  manager.on("receivedOfferChanged", function(offer, oldState) {
+  manager.on("receivedOfferChanged", function (offer, oldState) {
     account = cfg.accountNames[offer.manager.steamID] || offer.manager
     var offerItems = getOfferItems(offer);
     var message = account + "'s trade offer state changed (" + offer.id + "): " +
@@ -110,12 +110,12 @@ var accountTradeHandler = function(username, password, sharedSecret) {
       TradeOfferManager.getStateName(offer.state);
 
     if (offer.state == TradeOfferManager.ETradeOfferState.Accepted) {
-      offer.getReceivedItems(function(err, items) {
+      offer.getReceivedItems(function (err, items) {
         if (err) {
           message = message + " Could not get received items: " + err.message;
           logger.error(message, offerItems);
         } else {
-          var names = items.map(function(item) {
+          var names = items.map(function (item) {
             return item.name;
           });
           logger.success(message + " Received: " + names.join(", "), offerItems);
@@ -126,7 +126,7 @@ var accountTradeHandler = function(username, password, sharedSecret) {
     }
   });
 
-  manager.on("pollData", function(pollData) {
+  manager.on("pollData", function (pollData) {
     fs.writeFile(pollDataFile, JSON.stringify(pollData));
   })
 }

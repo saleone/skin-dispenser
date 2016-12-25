@@ -1,4 +1,4 @@
-(function() {
+(function () {
   const path = require("path");
 
   const winston = require("winston");
@@ -15,7 +15,7 @@
 
   var loggers = {};
 
-  var createLogPath = function(level, username) {
+  var createLogPath = function (level, username) {
     var logPath = path.join(shell.pwd().toString(), cfg.logging["logFilesRoot"]);
     shell.mkdir("-p", logPath);
     if (cfg.logging["separateAccountFolders"]) {
@@ -28,7 +28,7 @@
     return logPath;
   }
 
-  var createLogger = function(level, username) {
+  var createLogger = function (level, username) {
     var logger = new winston.Logger({
       levels: {
         "error": 0,
@@ -39,10 +39,10 @@
       transports: [
         new winston.transports.Console({
           colorize: true,
-          timestamp: function() {
+          timestamp: function () {
             return new Date().format(cfg.dateFormats["console"])
           },
-          formatter: function(opts) {
+          formatter: function (opts) {
             return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
               (undefined !== opts.message ? opts.message : '')
           }
@@ -50,11 +50,11 @@
         new winston.transports.File({
           name: "datamine",
           filename: createLogPath("datamine", username),
-          timestamp: function() {
+          timestamp: function () {
             return Date.now().toString() + "|" + new Date().format("HH:MM:ss dd.mm.yyyy");
           },
           json: false,
-          formatter: function(opts) {
+          formatter: function (opts) {
             var timeSplit = opts.timestamp().split("|");
             return JSON.stringify({
               "time": timeSplit[0],
@@ -68,11 +68,11 @@
         new winston.transports.File({
           name: "all",
           filename: createLogPath("all", username),
-          timestamp: function() {
+          timestamp: function () {
             return new Date().format(cfg.dateFormats["logFile"]);
           },
           json: false,
-          formatter: function(opts) {
+          formatter: function (opts) {
             return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
               (undefined !== opts.message ? opts.message : '')
           }

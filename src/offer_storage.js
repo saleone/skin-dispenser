@@ -1,8 +1,8 @@
-(function() {
+(function () {
   const storage = require('fifo')();
 
-  const acceptOffer = function(offer) {
-    offer.accept(function(err) {
+  const acceptOffer = function (offer) {
+    offer.accept(function (err) {
       if (!err) {
         return true;
       }
@@ -10,11 +10,11 @@
     });
   };
 
-  const acceptPending = function() {
+  const acceptPending = function () {
     if (storage.length <= 0) {
       return;
     }
-    storage.forEach(function(offer, node) {
+    storage.forEach(function (offer, node) {
       if (acceptOffer(offer)) {
         storage.remove(node);
       }
