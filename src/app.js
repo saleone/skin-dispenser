@@ -18,12 +18,11 @@ var getOfferItems = function (offer) {
     "giving": []
   };
   for (i = 0; i < offer.itemsToReceive.length; i++) {
-    var itemPair = [offer.itemsToReceive[i].id, offer.itemsToReceive[i].market_name];
-    items["receiving"].push(itemPair);
+    items["receiving"].push(offer.itemsToReceive[i].market_name);
   }
+
   for (i = 0; i < offer.itemsToGive.length; i++) {
-    var itemPair = [offer.itemsToGive[i].id, offer.itemsToGive[i].market_name];
-    items["giving"].push(itemPair);
+    items["giving"].push(offer.itemsToGive[i].market_name);
   }
   return items;
 }
