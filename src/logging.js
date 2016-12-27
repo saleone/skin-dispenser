@@ -29,41 +29,41 @@
     }
 
     var createLogger = function (level, username) {
-        var logger = new winston.Logger({
-            levels: {
-                "error": 0,
-                "success": 1,
-                "regular": 2,
-                "info": 3
+        // Define transports for logs.
+        datamine_transport = new winston.transports.File({
+            name: "datamine",
+            filename: createLogPath("datamine", username),
+            timestamp: function () {
+                return Date.now().toString() + "|" + new Date().format("HH:MM:ss dd.mm.yyyy");
             },
-            transports: [
-                new winston.transports.Console({
-                    colorize: true,
-                    timestamp: function () {
-                        return new Date().format(cfg.dateFormats["console"])
-                    },
-                    formatter: function (opts) {
-                        return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
-                            (undefined !== opts.message ? opts.message : '')
-                    }
-                }),
-                new winston.transports.File({
-                    name: "datamine",
-                    filename: createLogPath("datamine", username),
-                    timestamp: function () {
-                        return Date.now().toString() + "|" + new Date().format("HH:MM:ss dd.mm.yyyy");
-                    },
-                    json: false,
-                    formatter: function (opts) {
-                        return JSON.stringify({
-                            "id": opts.message.substring(0, 11),
-                            "receiving": opts.meta["receiving"],
-                            "giving": opts.meta["giving"],
-                        });
-                    }
-                })
-            ]
+            json: false,
+            formatter: function (opts) {
+                return JSON.stringify({
+                    "id": opts.message.substring(0, 11),
+                    "receiving": opts.meta["receiving"],
+                    "giving": opts.meta["giving"],
+                });
+            }
         });
+
+        console_transport = new winston.transports.Console({
+            colorize: true,
+            timestamp: function () {
+                return new Date().format(cfg.dateFormats["console"])
+            },
+            formatter: function (opts) {
+                return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
+                    (undefined !== opts.message ? opts.message : '')
+            }
+        });
+
+        // Create logger instance with transports.
+        var logger = new winston.Logger({
+            levels: {"error": 0, "success": 1, "regular": 2, "info": 3},
+            transports: [datamine_transport, console_transport],
+        });
+
+        // Track loggers for every user.
         loggers[username] = logger;
         return logger;
     };
