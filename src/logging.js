@@ -42,6 +42,8 @@
                     "id": opts.message.substring(0, 11),
                     "receiving": opts.meta["receiving"],
                     "giving": opts.meta["giving"],
+                    "state": opts.meta["state"],
+                    "time": Date.now()
                 });
             }
         });

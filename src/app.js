@@ -81,38 +81,46 @@ var accountTradeHandler = function (username, password, sharedSecret) {
 
     manager.on("newOffer", function (offer) {
         var account = cfg.accountNames[offer.manager.steamID] || offer.manager;
-        var offerItems = getOfferItems(offer);
-        var message = offer.id + " ▶ " + account + "received an offer. ";
+
+        // Cusom data tied to offer
+        var logData = getOfferItems(offer);
+        // States represent:
+        // R - Received (offer that didnt change state)
+        // C - Canceled (removed by the sender)
+        // A - Accepted (accepted by the dispenser or manually)
+        logData["state"] = "R";
+        var message = offer.id + " ▶ " + account + " received an offer. ";
         if (offer.itemsToGive.length == 0) {
             offer.accept(function (err) {
                 if (err) {
                     storage.push(offer);
-                    logger.error(message + "Unable to accept offer: " + err.message, offerItems);
+                    logger.error(message + "Unable to accept offer: " + err.message, logData);
                     playSound("errorOnDispense");
                 } else {
                     community.checkConfirmations();
-                    logger.success(message + "Offer accepted.", offerItems);
+                    logger.success(message + "Offer accepted.", logData);
                     playSound("dispensed");
                 }
             });
         } else {
-            logger.regular(message + "Skiping offer:" + " Trade sender requests items.", offerItems);
+            logger.regular(message + "Skiping offer:" + " Trade sender requests items.", logData);
             playSound("regularOffer");
         }
     });
 
     manager.on("receivedOfferChanged", function (offer, oldState) {
         var account = cfg.accountNames[offer.manager.steamID] || offer.manager;
-        // These logs will be used to track if the offers are accepted or
-        // declined manually or with dispenser.
+
         var logData = getOfferItems(offer);
-        logData["accepted"] = false;
+        logData["state"] = "C";
+
         var message = offer.id + " ▶ " + account + "'s trade offer state changed: " +
             TradeOfferManager.getStateName(oldState) + " 🠒 " +
             TradeOfferManager.getStateName(offer.state);
 
         if (offer.state == TradeOfferManager.ETradeOfferState.Accepted) {
-            logData["accepted"] = true;
+
+            logData["state"] = "A";
             offer.getReceivedItems(function (err, items) {
                 if (err) {
                     message = message + " Could not get received items: " + err.message;
