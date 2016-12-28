@@ -1,20 +1,23 @@
 {
-    "name": "skin-dispenser-browserless",
-    "version": "0.2.0",
-    "description": "Collect empty offers on steam trades.",
-    "main": "app.js",
-    "dependencies": {
-        "date-util": "^1.2.1",
-        "fifo": "^2.3.0",
-        "shelljs": "^0.7.0",
-        "steam-totp": "^1.3.0",
-        "steam-tradeoffer-manager": "^1.22.3",
-        "steam-user": "^3.5.1",
-        "steamcommunity": "^3.19.8",
-        "winston": "^2.2.0"
-    },
-    "author": {
-        "name": "Sasa Savic",
-        "email": "sasa.savic@protonmail.com"
-    }
+  "name": "skin-dispenser-browserless",
+  "version": "0.2.0",
+  "description": "Collect empty offers on steam trades.",
+  "main": "app.js",
+  "dependencies": {
+    "date-util": "^1.2.1",
+    "fifo": "^2.3.0",
+    "shelljs": "^0.7.0",
+    "steam-totp": "^1.3.0",
+    "steam-tradeoffer-manager": "^1.22.3",
+    "steam-user": "^3.5.1",
+    "steamcommunity": "^3.19.8",
+    "winston": "^2.2.0"
+  },
+  "author": {
+    "name": "Sasa Savic",
+    "email": "savic-sasa@outlook.com"
+  },
+  "devDependencies": {
+    "eslint": "^3.12.2"
+  }
 }
