@@ -19,18 +19,18 @@
         var logPath = path.join(shell.pwd().toString(), cfg.logging["logFilesRoot"]);
         shell.mkdir("-p", logPath);
         if (cfg.logging["separateAccountFolders"]) {
-            logPath = path.join(logPath, username)
+            logPath = path.join(logPath, username);
             shell.mkdir("-p", logPath);
             logPath = path.join(logPath, level + "_log.txt");
         } else {
             logPath = path.join(logPath, username + "_" + level + "_log.txt");
         }
         return logPath;
-    }
+    };
 
     var createLogger = function (level, username) {
         // Define transports for logs.
-        datamine_transport = new winston.transports.File({
+        var datamine_transport = new winston.transports.File({
             name: "datamine",
             filename: createLogPath("datamine", username),
             timestamp: function () {
@@ -46,14 +46,14 @@
             }
         });
 
-        console_transport = new winston.transports.Console({
+        var console_transport = new winston.transports.Console({
             colorize: true,
             timestamp: function () {
-                return new Date().format(cfg.dateFormats["console"])
+                return new Date().format(cfg.dateFormats["console"]);
             },
             formatter: function (opts) {
                 return opts.level.toUpperCase() + " " + opts.timestamp() + " -> " +
-                    (undefined !== opts.message ? opts.message : '')
+                    (undefined !== opts.message ? opts.message : "");
             }
         });
 

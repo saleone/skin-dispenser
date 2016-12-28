@@ -1,5 +1,5 @@
 (function () {
-    const storage = require('fifo')();
+    const storage = require("fifo")();
 
     const acceptOffer = function (offer) {
         offer.accept(function (err) {

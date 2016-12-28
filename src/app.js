@@ -1,23 +1,23 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-require('date-util');
-const TradeOfferManager = require('steam-tradeoffer-manager');
-const SteamUser = require('steam-user');
-const SteamCommunity = require('steamcommunity');
-const SteamTotp = require('steam-totp');
-const shell = require('shelljs');
+require("date-util");
+const TradeOfferManager = require("steam-tradeoffer-manager");
+const SteamUser = require("steam-user");
+const SteamCommunity = require("steamcommunity");
+const SteamTotp = require("steam-totp");
+const shell = require("shelljs");
 
-const cfg = require('./config_parser');
-const log = require('./logging');
-const storage = require('./offer_storage');
+const cfg = require("./config_parser");
+const log = require("./logging");
+const storage = require("./offer_storage");
 
 var getOfferItems = function (offer) {
     var items = {
         "receiving": [],
         "giving": []
     };
-    for (i = 0; i < offer.itemsToReceive.length; i++) {
+    for (var i = 0; i < offer.itemsToReceive.length; i++) {
         items["receiving"].push(offer.itemsToReceive[i].market_name);
     }
 
@@ -25,7 +25,7 @@ var getOfferItems = function (offer) {
         items["giving"].push(offer.itemsToGive[i].market_name);
     }
     return items;
-}
+};
 
 var playSound = function (soundType) {
     if (fs.existsSync(cfg.sounds[soundType])) {
@@ -33,7 +33,7 @@ var playSound = function (soundType) {
             "silent": true
         });
     }
-}
+};
 
 var accountTradeHandler = function (username, password, sharedSecret) {
     var client = new SteamUser();
@@ -46,7 +46,7 @@ var accountTradeHandler = function (username, password, sharedSecret) {
 
     var logger = log.createLogger("all", username);
 
-    polldataDir = "polldata/";
+    var polldataDir = "polldata/";
     if (!fs.exists(polldataDir)) {
         shell.mkdir("-p", polldataDir);
     }
@@ -66,7 +66,7 @@ var accountTradeHandler = function (username, password, sharedSecret) {
             " successfully logged into Steam.");
     });
 
-    client.on('webSession', function (sessionID, cookies) {
+    client.on("webSession", function (sessionID, cookies) {
         manager.setCookies(cookies, function (err) {
             if (err) {
                 console.log(err);
@@ -80,9 +80,9 @@ var accountTradeHandler = function (username, password, sharedSecret) {
     });
 
     manager.on("newOffer", function (offer) {
-        account = cfg.accountNames[offer.manager.steamID] || offer.manager
+        var account = cfg.accountNames[offer.manager.steamID] || offer.manager;
         var offerItems = getOfferItems(offer);
-        var message = offer.id + ' ▶ ' + account + 'received an offer. '
+        var message = offer.id + " ▶ " + account + "received an offer. ";
         if (offer.itemsToGive.length == 0) {
             offer.accept(function (err) {
                 if (err) {
@@ -102,22 +102,26 @@ var accountTradeHandler = function (username, password, sharedSecret) {
     });
 
     manager.on("receivedOfferChanged", function (offer, oldState) {
-        account = cfg.accountNames[offer.manager.steamID] || offer.manager
-        var offerItems = getOfferItems(offer);
-        var message = offer.id + ' ▶ ' + account + "'s trade offer state changed: " +
+        var account = cfg.accountNames[offer.manager.steamID] || offer.manager;
+        // These logs will be used to track if the offers are accepted or
+        // declined manually or with dispenser.
+        var logData = getOfferItems(offer);
+        logData["accepted"] = false;
+        var message = offer.id + " ▶ " + account + "'s trade offer state changed: " +
             TradeOfferManager.getStateName(oldState) + " 🠒 " +
             TradeOfferManager.getStateName(offer.state);
 
         if (offer.state == TradeOfferManager.ETradeOfferState.Accepted) {
+            logData["accepted"] = true;
             offer.getReceivedItems(function (err, items) {
                 if (err) {
                     message = message + " Could not get received items: " + err.message;
-                    logger.error(message, offerItems);
+                    logger.error(message, logData);
                 } else {
                     var names = items.map(function (item) {
                         return item.name;
                     });
-                    logger.success(message + " Received: " + names.join(", "), offerItems);
+                    logger.success(message + " Received: " + names.join(", "), logData);
                 }
             });
         } else {
@@ -127,9 +131,9 @@ var accountTradeHandler = function (username, password, sharedSecret) {
 
     manager.on("pollData", function (pollData) {
         fs.writeFile(pollDataFile, JSON.stringify(pollData));
-    })
-}
+    });
+};
 
-for (i = 0; i < cfg.accountLoginInfos.length; i++) {
+for (var i = 0; i < cfg.accountLoginInfos.length; i++) {
     accountTradeHandler(cfg.accountLoginInfos[i][0], cfg.accountLoginInfos[i][1], cfg.accountLoginInfos[i][2]);
 }
