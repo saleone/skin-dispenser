@@ -1,7 +1,7 @@
 (function () {
-    const storage = require("fifo")();
+    var storage = require("fifo")();
 
-    const acceptOffer = function (offer) {
+    var acceptOffer = function (offer) {
         offer.accept(function (err) {
             if (!err) {
                 return true;
@@ -10,7 +10,7 @@
         });
     };
 
-    const acceptPending = function () {
+    var acceptPending = function () {
         if (storage.length <= 0) {
             return;
         }
@@ -23,5 +23,5 @@
 
     setInterval(acceptPending, 2 * 1000);
 
-    module.exports = storage;
+    module.exports.storage = storage;
 });
