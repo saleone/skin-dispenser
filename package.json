@@ -14,10 +14,7 @@
     "winston": "^2.2.0"
   },
   "author": {
-    "name": "Sasa Savic",
-    "email": "savic-sasa@outlook.com"
-  },
-  "devDependencies": {
-    "eslint": "^3.12.2"
+      "name": "Sasa Savic",
+      "email": "sasa@savic.pw"
   }
 }
