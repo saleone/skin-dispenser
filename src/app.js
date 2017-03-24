@@ -62,6 +62,7 @@ var accountTradeHandler = function (username, password, sharedSecret) {
     });
 
     client.on("loggedOn", function () {
+        this.setPersona(SteamUser.EPersonaState.Online) // we want to appear Online 24/7
         log.winston.info("User " + (cfg.accountNames[this.steamID] || this.steamID) +
             " successfully logged into Steam.");
     });
@@ -74,15 +75,22 @@ var accountTradeHandler = function (username, password, sharedSecret) {
                 return;
             }
         });
-
+        
         community.setCookies(cookies);
         community.startConfirmationChecker(50000, "identitySecret" + username);
+    });
+
+    // fix for all of 'malformed json response' when requesting items from trade,
+    // which also sometimes blocks empty offers from being accepted,
+    // allowing us to have bot running 24/7 
+    community.on("sessionExpired", function() {
+        client.webLogOn();
     });
 
     manager.on("newOffer", function (offer) {
         var account = cfg.accountNames[offer.manager.steamID] || offer.manager;
 
-        // Cusom data tied to offer
+        // Custom data tied to offer
         var logData = getOfferItems(offer);
         // States represent:
         // R - Received (offer that didnt change state)
@@ -92,8 +100,8 @@ var accountTradeHandler = function (username, password, sharedSecret) {
         var message = offer.id + " ▶ " + account + " received an offer. ";
         if (offer.itemsToGive.length == 0) {
             offer.accept(function (err) {
-                if (err) {
-                    storage.push(offer);
+                if (err) { 
+                    /*storage.push(offer);*/ // disabled until fixed
                     logger.error(message + "Unable to accept offer: " + err.message, logData);
                     playSound("errorOnDispense");
                 } else {
